@@ -88,7 +88,8 @@ var World = {
 		    console.log("LOAD");
 			//World.requestDataFromLocal(lat, lon);
             //World.initiallyLoadedData = true;
-            World.closestPois(lat, lon);
+            //World.closestPois(lat, lon);
+            World.requestDataFromServer(lat, lon);
             World.initiallyLoadedData = true;
 
 
@@ -166,14 +167,36 @@ var World = {
         World.loadPoisFromJsonData(poiData);
 	},
 
+	requestDataFromServer: function requestDataFromServerFn(lat, lon) {
+
+        /* Set helper var to avoid requesting places while loading. */
+        World.isRequestingData = true;
+        World.updateStatusMessage('Requesting places from web-service');
+
+        /* Server-url to JSON content provider. */
+        var serverUrl = "http://172.25.100.114:8080/Hidrantes/webresources/servicios.hidrantes/registro/?latitud=" +
+            lat + "&longitud=" + lon;
+
+        var jqxhr = $.getJSON(serverUrl, function(data) {
+                World.loadPoisFromJsonData(data);
+                console.log(data);
+            })
+            .error(function(err) {
+                World.updateStatusMessage("Invalid web-service response.", true);
+                World.isRequestingData = false;
+            })
+            .complete(function() {
+                World.isRequestingData = false;
+            });
+    },
+
 	closestPois: function closestPoi(latitude, longitude){
 
 	    var posicionActual = new AR.GeoLocation(latitude, longitude);
 	    console.log(posicionActual);
 	    var posicionesHidrantes = [];
 	    var distanciasHaciaHidrantes = [];
-	    var arregloAux = [];
-	    var arregloOrdenado = [];
+	    var hidrantesCercanos = [];
 
         for (i=0; i<myJsonData.length; i++){
             //long = myJsonData[i]["longitude"];
@@ -190,15 +213,15 @@ var World = {
         console.log(distanciasHaciaHidrantes);
 
         for (i=0; i<distanciasHaciaHidrantes.length; i++){
-            arregloAux.push({"distancia":distanciasHaciaHidrantes[i],"indice":i});
+            if (distanciasHaciaHidrantes[i]<100){
+                    hidrantesCercanos.push({"distancia":distanciasHaciaHidrantes[i],"indice":i});
+            }
         }
-        console.log(arregloAux);
+        console.log(hidrantesCercanos);
 
-        arregloOrdenado=(arregloAux.sort(function (a,b){
-            return a.distancia - b.distancia;
-        })).slice(0,3);
+        for (i=0; i<hidrantesCercanos; i++){
 
-        console.log(arregloOrdenado);
+        }
 
 	}
 
