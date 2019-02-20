@@ -86,8 +86,11 @@ var World = {
         los marcadores posteriormente. */
 		if (!World.initiallyLoadedData) {
 		    console.log("LOAD");
-			World.requestDataFromLocal(lat, lon);
+			//World.requestDataFromLocal(lat, lon);
+            //World.initiallyLoadedData = true;
+            World.closestPois(lat, lon);
             World.initiallyLoadedData = true;
+
 
         }
         /* Actualización de la distancia a los hidrantes. */
@@ -155,13 +158,52 @@ var World = {
 
     /* Invocación del método que obtiene los datos del archivo JS local */
 	requestDataFromLocal: function requestDataFromLocalFn(centerPointLatitude, centerPointLongitude) {
-		var poisToCreate = 20;
+		//var poisToCreate = 15;
+		//var poiData = [];
+		//poiData = myJsonData.slice(0, poisToCreate);
 		var poiData = [];
 		poiData = myJsonData;
-        World.loadPoisFromJsonData(myJsonData);
+        World.loadPoisFromJsonData(poiData);
+	},
+
+	closestPois: function closestPoi(latitude, longitude){
+
+	    var posicionActual = new AR.GeoLocation(latitude, longitude);
+	    console.log(posicionActual);
+	    var posicionesHidrantes = [];
+	    var distanciasHaciaHidrantes = [];
+	    var arregloAux = [];
+	    var arregloOrdenado = [];
+
+        for (i=0; i<myJsonData.length; i++){
+            //long = myJsonData[i]["longitude"];
+            //lat = myJsonData[i]["latitude"];
+            posicionesHidrantes [i] = new AR.GeoLocation(myJsonData[i]["latitude"],myJsonData[i]["longitude"]);
+            //posicionesHidrantes [i] = new AR.GeoLocation(myData[i]["latitude"],myData[i]["longitude"]);
+        }
+        console.log(posicionesHidrantes);
+
+        for (j=0; j<posicionesHidrantes.length; j++){
+            //distanciasHaciaHidrantes [j] = posicionActual.distanceTo(posicionesHidrantes[j]);
+            distanciasHaciaHidrantes[j] = Math.round(posicionesHidrantes[j].distanceTo(posicionActual));
+        }
+        console.log(distanciasHaciaHidrantes);
+
+        for (i=0; i<distanciasHaciaHidrantes.length; i++){
+            arregloAux.push({"distancia":distanciasHaciaHidrantes[i],"indice":i});
+        }
+        console.log(arregloAux);
+
+        arregloOrdenado=(arregloAux.sort(function (a,b){
+            return a.distancia - b.distancia;
+        })).slice(0,3);
+
+        console.log(arregloOrdenado);
+
 	}
+
 };
 
-/* Función a la que se reenvían los cambios de ubicación del dispositovo. */
+/* Función a la que se reenvían los cambios de ubicación del dispositivo. */
 AR.context.onLocationChanged = World.locationChanged;
 AR.context.onScreenClick = World.onScreenClick;
