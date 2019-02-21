@@ -23,22 +23,6 @@ function Marker(poiData) {
 
     var disLocationString = "";
 
-    /*if(disLocation>1000)
-
-    {
-
-        disLocationString = Math.round(disLocation/10)/100 + "kms";
-
-    }
-
-    else
-
-    {
-
-        disLocationString = Math.round(disLocation) + "ms";
-
-    }*/
-
     disLocationString = Math.round(disLocation) + "ms";
     // create an AR.ImageDrawable for the marker in idle state
     this.markerDrawable_idle = new AR.ImageDrawable(World.markerDrawable_idle, 2.5, {

@@ -14,6 +14,8 @@ var World = {
 
     /* Inyección de los datos de los nuevos marcadores */
 	loadPoisFromJsonData: function loadPoisFromJsonDataFn(poiData) {
+        /* Se destruyen todos los objetos AR previos */
+        AR.context.destroyAll();
 
         PoiRadar.show();
         $('#radarContainer').unbind('click');
@@ -81,6 +83,14 @@ var World = {
 
     /* Método invocado cada vez que existe una actualización en la ubicación del dispositivo*/
 	locationChanged: function locationChangedFn(lat, lon, alt, acc) {
+
+        //Variable que almacena la posición actual del usuario
+	    World.userLocation = {
+            'latitude': lat,
+            'longitude': lon,
+            'altitude': alt,
+            'accuracy': acc
+        };
 
         /* Se cargan los marcadores por primera vez y se setea en true la variable initiallyLoadedData para actualizar
         los marcadores posteriormente. */
@@ -174,7 +184,7 @@ var World = {
         World.updateStatusMessage('Requesting places from web-service');
 
         /* Server-url to JSON content provider. */
-        var serverUrl = "http://172.25.100.114:8080/Hidrantes/webresources/servicios.hidrantes/registro/?latitud=" +
+        var serverUrl = "https://servicios.bomberosquito.gob.ec:8181/Hidrantes/webresources/servicios.hidrantes/registro/?latitud=" +
             lat + "&longitud=" + lon;
 
         var jqxhr = $.getJSON(serverUrl, function(data) {
@@ -188,6 +198,34 @@ var World = {
             .complete(function() {
                 World.isRequestingData = false;
             });
+    },
+
+/*    recargarHidrantes: function recargarHidrantesFn (){
+        if(!World.isRequestingData){
+            if(World.userLocation){
+                World.requestDataFromServer(World.userLocation.latitude, World.userLocation.longitude);
+                console.log("Posicion Actualizada");
+            }
+            else{
+                World.updateStatusMessage('Posición desconocida.',true);
+            }
+        }
+        else{
+            World.updateStatusMessage('Buscando posiciones...',true);
+        }
+    },*/
+
+    /* Método invocado para actualizar los objetos AR en pantalla y radar */
+    reloadPlaces: function reloadPlacesFn() {
+        if (!World.isRequestingData) {
+            if (World.userLocation) {
+                World.requestDataFromServer(World.userLocation.latitude, World.userLocation.longitude);
+            } else {
+                World.updateStatusMessage('Unknown user-location.', true);
+            }
+        } else {
+            World.updateStatusMessage('Already requesing places...', true);
+        }
     },
 
 	closestPois: function closestPoi(latitude, longitude){
